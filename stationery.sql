@@ -16,7 +16,7 @@ GO
 
 -- Clean up for repeatable runs
 DROP TABLE IF EXISTS dbo.OrderLine;
-DROP TABLE IF EXISTS dbo.[Order];
+DROP TABLE IF EXISTS dbo.Order;
 DROP TABLE IF EXISTS dbo.Product;
 DROP TABLE IF EXISTS dbo.Customer;
 GO
@@ -52,7 +52,7 @@ CREATE TABLE dbo.Product
 GO
 
 -- Order
-CREATE TABLE dbo.[Order]
+CREATE TABLE dbo.Order
 (
     OrderID         INT             NOT NULL IDENTITY PRIMARY KEY,
     CustomerID      INT             NOT NULL CONSTRAINT FK_Order_Customer FOREIGN KEY REFERENCES Customer (CustomerID),
@@ -67,7 +67,7 @@ GO
 CREATE TABLE dbo.OrderLine
 (
     OrderLineID         INT             NOT NULL IDENTITY PRIMARY KEY,
-    OrderID             INT             NOT NULL CONSTRAINT FK_OrderLine_Order FOREIGN KEY REFERENCES [Order] (OrderID),
+    OrderID             INT             NOT NULL CONSTRAINT FK_OrderLine_Order FOREIGN KEY REFERENCES Order (OrderID),
     ProductID           INT             NOT NULL CONSTRAINT FK_OrderLine_Product FOREIGN KEY REFERENCES Product (ProductID),
     LineNo              INT             NOT NULL,
     Quantity            INT             NOT NULL,
@@ -105,15 +105,15 @@ SET IDENTITY_INSERT dbo.Product OFF;
 GO
 
 -- Sample data: Order
-SET IDENTITY_INSERT dbo.[Order] ON;
-INSERT INTO dbo.[Order] (OrderID, CustomerID, OrderDate, Status, ShippingCity)
+SET IDENTITY_INSERT dbo.Order ON;
+INSERT INTO dbo.Order (OrderID, CustomerID, OrderDate, Status, ShippingCity)
 VALUES
 (1001, 1, '2025-01-10', 'Shipped', 'Jerusalem'),
 (1002, 2, '2025-01-11', 'Delivered', 'Tel Aviv'),
 (1003, 1, '2025-01-15', 'Delivered', 'Jerusalem'),
 (1004, 3, '2025-01-16', 'Pending', 'Haifa'),
 (1005, 5, '2025-01-17', 'Shipped', 'Jerusalem');
-SET IDENTITY_INSERT dbo.[Order] OFF;
+SET IDENTITY_INSERT dbo.Order OFF;
 GO
 
 -- Sample data: Order line items
@@ -144,7 +144,7 @@ BEGIN
     IF @TargetStatus NOT IN ('Shipped', 'Delivered')
         THROW 50000, 'Target status must be Shipped or Delivered.', 1;
 
-    IF NOT EXISTS (SELECT 1 FROM dbo.[Order] WHERE OrderID = @OrderID)
+    IF NOT EXISTS (SELECT 1 FROM dbo.Order WHERE OrderID = @OrderID)
         THROW 50001, 'Order does not exist.', 1;
 
     IF NOT EXISTS (SELECT 1 FROM dbo.OrderLine WHERE OrderID = @OrderID)
@@ -166,7 +166,7 @@ BEGIN
         JOIN dbo.OrderLine ol ON p.ProductID = ol.ProductID
         WHERE ol.OrderID = @OrderID;
 
-        UPDATE dbo.[Order]
+        UPDATE dbo.Order
             SET Status = @TargetStatus
         WHERE OrderID = @OrderID;
     COMMIT TRAN;
@@ -179,7 +179,7 @@ DECLARE @ReportMonthEnd   DATE = EOMONTH(GETDATE());
 
 ;WITH MonthlyOrders AS (
     SELECT o.OrderID, o.CustomerID
-    FROM dbo.[Order] o
+    FROM dbo.Order o
     WHERE o.OrderDate BETWEEN @ReportMonthStart AND @ReportMonthEnd
       AND o.Status IN ('Shipped', 'Delivered')
 ), LineTotals AS (
@@ -226,7 +226,7 @@ SELECT o.OrderDate AS [Date],
        COUNT(DISTINCT o.OrderID) AS NumberOfOrders,
        SUM(ol.Quantity) AS TotalItemsSold,
        SUM(ol.Quantity * ol.UnitPriceAtTime * (100 - ol.DiscountPercent) / 100.0) AS TotalRevenue
-FROM dbo.[Order] o
+FROM dbo.Order o
 JOIN dbo.OrderLine ol ON o.OrderID = ol.OrderID
 WHERE o.Status IN ('Pending', 'Shipped', 'Delivered')
 GROUP BY o.OrderDate
