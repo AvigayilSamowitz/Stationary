@@ -66,3 +66,4 @@ CREATE TABLE dbo.OrderLine
     CONSTRAINT c_OrderLine_DiscountPercent_must_be_between_0_and_100 CHECK (DiscountPercent BETWEEN 0 AND 100)
 );
 GO
+

@@ -63,4 +63,3 @@ on o.customerID = c.customerID
 and o.orderdate = x.OrderDate
 join product p
 on x.ProductName = p.productname
-
