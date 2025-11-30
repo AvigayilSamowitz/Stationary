@@ -7,6 +7,8 @@
 */
 
 -- Recreate database
+use master
+go
 DROP DATABASE IF EXISTS Stationery
 GO
 CREATE DATABASE Stationery
