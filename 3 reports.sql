@@ -29,4 +29,3 @@ WHERE o.OrderStatus IN ('Pending', 'Shipped', 'Delivered')
 GROUP BY o.OrderDate
 ORDER BY o.OrderDate;
 GO
-
